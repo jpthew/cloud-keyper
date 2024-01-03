@@ -6,6 +6,7 @@ import sys
 import time
 from prompt_toolkit import PromptSession
 import prompt_toolkit
+from prettytable import PrettyTable
 
 print('''
      _             _ _  __                       
@@ -27,10 +28,20 @@ def handle_input(text):
     if text.lower() == "help":
         help_page()
     if text.lower() == "list":
-        print(awsdb.get_aws_all_key_names())
+        get_aws_keys_table()
     if text.lower() == "import-aws":
         import_aws_key()
 
+def get_aws_keys_table():
+    # run awsdb.get_aws_all_key_names() to get all key names and format in a ui table
+    keys = awsdb.get_aws_all_key_names()
+    columns = ['KEY_NAME']
+    table = PrettyTable(columns)
+    table.field_names = columns
+    for key in keys:
+        table.add_row(key)
+    print(table)
+    
 
 def help_page():
     print('''
@@ -45,7 +56,7 @@ def import_aws_key():
         print('''
         Enter memorably AWS key name (e.g. [AKIA] jpthew, [ASIA] ec2-dev1-sts, etc...): 
         ''')
-        key_name = input('> ')
+        key_name = input('KEY NAME> ')
         print('''
         Enter AWS access key ID: 
         ''')
@@ -56,15 +67,16 @@ def import_aws_key():
             If you want to refresh the key, please use the refresh command.
             ''')
             return
-        aws_access_key_id = input('> ')
+        aws_access_key_id = input('AccessKeyId > ')
         print('''
         Enter AWS secret access key: 
         ''')
-        aws_secret_access_key = input('> ')
+        aws_secret_access_key = input('SecretAccessKey > ')
         print('''
         Enter AWS session token (optional): 
         ''')
-        aws_session_token = input('> ')
+        aws_session_token = input('SessionToken > ')
+
         if validate_aws_key(aws_access_key_id, aws_secret_access_key, aws_session_token) == True:
             print('''
         Key validated successfully!
@@ -73,11 +85,13 @@ def import_aws_key():
             print('''
             Key validation failed! Please check your key and try again.
                 ''')
-            return  
+            return
+        
         print('''
         Enter AWS region: 
         ''')
         aws_region = input('> ')
+
         if aws_session_token == '':
             remote_server = 'NULL'
             hops = 'NULL'
@@ -96,6 +110,7 @@ def import_aws_key():
         datetime = time.strftime('%Y-%m-%d %H:%M:%S')
         stale = 'FALSE'
         key_id = awsdb.get_aws_next_key_id()
+        print('key_id: ' + str(key_id) + '\nkey_name: ' + key_name + '\naws_access_key_id: ' + aws_access_key_id + '\naws_secret_access_key: ' + aws_secret_access_key + '\naws_session_token: ' + aws_session_token + '\naws_region: ' + aws_region + '\naccount_id: ' + account_id + '\naccount_user: ' + account_user + '\ndatetime: ' + datetime + '\nexpiration: ' + str(expiration) + '\nremote_server: ' + remote_server + '\nhops: ' + hops + '\nstale: ' + stale)
         awsdb.insert_aws_credentials(key_id, key_name, aws_access_key_id, aws_secret_access_key, aws_session_token, aws_region, account_id, account_user, datetime, expiration, remote_server, hops, stale)
     except KeyboardInterrupt:
         print()
@@ -146,11 +161,12 @@ def get_aws_account_user(aws_access_key_id, aws_secret_access_key, aws_session_t
 while True:
     try:
         # Read user input
-        text = session.prompt("> ")
+        text = session.prompt("MENU > ")
 
         # Handle user input
         handle_input(text)
 
     except KeyboardInterrupt:
         # Handle Ctrl+C
+        print("Exiting...")
         break

@@ -78,7 +78,7 @@ def insert_aws_credentials(key_id, key_name, aws_access_key_id, aws_secret_acces
             hops,
             stale
         ) VALUES (
-            ?,?,?,?,?,?,?,?,?,?,?,?
+            ?,?,?,?,?,?,?,?,?,?,?,?,?
         )
     ''', (key_id, key_name, aws_access_key_id, aws_secret_access_key, aws_session_token, aws_region, account_id, account_user, datetime, expiration, remote_server, hops, stale))
 
@@ -154,10 +154,7 @@ def get_aws_all_key_names():
     cursor.execute('SELECT key_name FROM aws_credentials ORDER BY key_id ASC')
 
     # Fetch the data
-    if cursor.fetchone() is None:
-        key_names = 'No keys found'
-    else:
-        key_names = cursor.fetchall()
+    key_names = cursor.fetchall()
 
     # Close the connection
     conn.close()
